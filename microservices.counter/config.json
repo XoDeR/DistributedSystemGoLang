@@ -1,0 +1,13 @@
+{
+    "MostPopularToken": "YOUR-MOST-POPULAR-API-TOKEN",
+    "SemanticToken": "YOUR-SEMANTIC-API-TOKEN",
+
+    "Server": {
+        "ServerType": "rpc",
+        "RPCPort": 7777,
+        "HTTPPort": 8888,
+        "Log": "f:/GoLang/src/microservices.counter/logs/app.log",
+        "HTTPAccessLog": "f:/GoLang/src/microservices.counter/logs/access.log",
+        "RPCAccessLog": "f:/GoLang/src/microservices.counter/logs/rpc-access.log"
+    }
+}
