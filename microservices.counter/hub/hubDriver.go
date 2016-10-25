@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"net"
 	"strconv"
@@ -23,28 +24,19 @@ import (
 var (
 	// RPC server (coordinator-hub) port 7777
 	serverAddr = flag.String("rpc_addr", "127.0.0.1:7777", "The server address in the format of host:port")
+
+	hubClient *common.NYTProxyServiceClient
 )
 
 func createWorker(index uint32, hubIp *string, hubPort *string) {
-	var portserviceString string = "service" + strconv.FormatUint(uint64(index), 10)
 	var addr string = *hubIp + ":" + *hubPort
-	var param1 string = "-rpc_addr=" + addr
-	exec.Command("f:\\GoLang\\src\\microservices.counter\\worker\\worker.exe", param1)
+	var param1 string = "-id=" + strconv.Itoa(int(index))
+	var param2 string = "-hub_addr=" + addr
+	exec.Command("f:\\GoLang\\src\\microservices.counter\\worker\\worker.exe", param1, param2)
 }
 
-func testAddNewItem(hubClient *NYTProxyServiceClient) {
-	addNewItem, err := *hubClient.AddNewItemWithTenant(context.Background(), &common.AddNewItemWithTenantRequest{
-		ItemId:   uint32(1),
-		TenantId: uint32(1),
-	})
-	if err != nil {
-		//log.Fatal("get most popular list error: ", err)
-	}
+func testAddNewItem() {
 
-	fmt.Println("Add New Item Results:")
-	out, _ := json.MarshalIndent(addNewItem, "", "    ")
-	fmt.Fprint(os.Stdout, string(out))
-	fmt.Println("")
 }
 
 func main() {
@@ -62,7 +54,20 @@ func main() {
 
 	hubClient := common.NewNYTProxyServiceClient(conn)
 
-	testAddNewItem(&hubClient)
+	// testAddNewItem
+
+	addNewItem, err := hubClient.AddNewItemWithTenant(context.Background(), &common.AddNewItemWithTenantRequest{
+		ItemId:   uint32(1),
+		TenantId: uint32(1),
+	})
+	if err != nil {
+		//log.Fatal("get most popular list error: ", err)
+	}
+
+	fmt.Println("Add New Item Results:")
+	out, _ := json.MarshalIndent(addNewItem, "", "    ")
+	fmt.Fprint(os.Stdout, string(out))
+	fmt.Println("")
 
 	// create 5 workers
 	var hubIp string = "127.0.0.1"

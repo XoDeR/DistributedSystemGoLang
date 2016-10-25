@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"strconv"
@@ -12,53 +11,38 @@ import (
 	"microservices.counter/common"
 )
 
-type Headers []string
+var WorkerId uint32
+var HubAddr string
+var ItemsMap map[uint32][]uint32 // tenantId : itemId slice
 
-const CLIENT_ID = 2
+func testSendResponse(hubAddr string) {
+	var tenantId uint32 = 1
 
-func main() {
-	dest := flag.String("d", "127.0.0.1:2110", "Enter the destination socket address")
-	flag.Parse()
-
-	data, err := createMessage(tenantId uint32)
+	data, err := createMessage(tenantId)
 	checkError(err)
-	sendDataToDest(data, dest)
+	sendDataToDest(data, &hubAddr)
 }
 
-func createMessage(tenantId uint32) ([]byte, error) 
-{
-	ProtoMessage := new(ProtobufTest.TestMessage)
-	ProtoMessage.ClientId = proto.Int32(CLIENT_ID)
+func main() {
+	WorkerId = uint32(*flag.Uint("id", 0, "Worker Id"))
+	HubAddr = *flag.String("hub_addr", "127.0.0.1:2110", "Hub socket address")
+	flag.Parse()
 
-	//loop through the records
-	for {
-		record, err := csvreader.Read()
-		if err != io.EOF {
-			checkError(err)
-		} else {
+	ItemsMap = make(map[uint32][]uint32)
 
-			break
-		}
-		//Populate items
-		testMessageItem := new(ProtobufTest.TestMessage_MsgItem)
-		itemid, err := strconv.Atoi(record[ITEMIDINDEX])
-		checkError(err)
-		testMessageItem.Id = proto.Int32(int32(itemid))
-		testMessageItem.ItemName = &record[ITEMNAMEINDEX]
-		itemvalue, err := strconv.Atoi(record[ITEMVALUEINDEX])
-		checkError(err)
-		testMessageItem.ItemValue = proto.Int32(int32(itemvalue))
-		itemtype, err := strconv.Atoi(record[ITEMTYPEINDEX])
-		checkError(err)
-		iType := ProtobufTest.TestMessage_ItemType(itemtype)
-		testMessageItem.ItemType = &iType
+	testSendResponse(HubAddr)
+}
 
-		ProtoMessage.Messageitems = append(ProtoMessage.Messageitems, testMessageItem)
+func createMessage(tenantId uint32) ([]byte, error) {
+	ProtoMessage := new(common.WorkerGetItemListResponse)
+	ProtoMessage.WorkerId = WorkerId
 
-		fmt.Println(record)
+	itemIdList := ItemsMap[tenantId]
+
+	for _, v := range itemIdList {
+		ProtoMessage.Items = append(ProtoMessage.Items, v)
 	}
 
-	//fmt.Println(ProtoMessage.Messageitems)
 	return proto.Marshal(ProtoMessage)
 }
 
@@ -75,15 +59,4 @@ func checkError(err error) {
 		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
-}
-
-func (h Headers) getHeaderIndex(headername string) int {
-	if len(headername) >= 2 {
-		for index, s := range h {
-			if s == headername {
-				return index
-			}
-		}
-	}
-	return -1
 }
