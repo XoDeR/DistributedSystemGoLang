@@ -5,34 +5,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
-	"text/template"
 
 	"microservices.counter/common"
 )
 
 var addr = flag.String("addr", ":8888", "http service address")
-var homeTemplate = template.Must(template.ParseFiles("home.html"))
-
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", 404)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", 405)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	homeTemplate.Execute(w, r.Host)
-}
 
 func createItemRecord(item common.Item) {
 	// POST request
@@ -115,8 +96,8 @@ func main() {
 	exec.Command("f:\\GoLang\\src\\microservices.counter\\coordinator\\coordinator.exe")
 
 	// create hub
-	var hubIp string = "127.0.0.1"
-	exec.Command("f:\\GoLang\\src\\microservices.counter\\hub\\hub.exe")
+	// "rpc_addr", "127.0.0.1:7777"
+	exec.Command("f:\\GoLang\\src\\microservices.counter\\hub\\hub.exe", "-rpc_addr 127.0.0.1:7777")
 
 	createItems()
 
