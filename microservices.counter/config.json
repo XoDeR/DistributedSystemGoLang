@@ -1,6 +1,5 @@
 {
-    "MostPopularToken": "YOUR-MOST-POPULAR-API-TOKEN",
-    "SemanticToken": "YOUR-SEMANTIC-API-TOKEN",
+    "ItemsToken": "items",
 
     "Server": {
         "ServerType": "rpc",

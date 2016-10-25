@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package common;
+
+message WorkerGetItemListRequest {
+  uint32 workerId = 1;
+  uint32 tenantId = 2;
+}
+
+message WorkerGetItemListResponse {
+  uint32 workerId = 1;
+  repeated uint32 items = 2;
+}
+
+message WorkerAddNewItemRequest {
+  uint32 workerId = 1;
+  uint32 itemId = 2;
+  uint32 tenantId = 3;
+}
+
+message WorkerAddNewItemResponse {
+  uint32 workerId = 1;
+  bool result = 2;
+}
+
+message GetItemCountByTenantRequest {
+    uint32 tenantId = 1;
+}
+
+message GetItemCountByTenantResult {
+    uint32 result = 1;
+}
+
+message GetItemCountByTenantResponse {
+    GetItemCountByTenantResult result = 1;
+}
+
+message AddNewItemWithTenantRequest {
+    uint32 itemId = 1;
+    uint32 tenantId = 2;
+}
+
+message AddNewItemWithTenantResult {
+    bool result = 1;
+}
+
+message AddNewItemWithTenantResponse {
+    AddNewItemWithTenantResult result = 1;
+}
+
+service NYTProxyService {
+    rpc GetItemCountByTenant(GetItemCountByTenantRequest) returns (GetItemCountByTenantResponse);
+    rpc AddNewItemWithTenant(AddNewItemWithTenantRequest) returns (AddNewItemWithTenantResponse);
+}

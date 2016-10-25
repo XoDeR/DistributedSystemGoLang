@@ -1,4 +1,4 @@
-package item
+package common
 
 type Item struct {
 	Id     string

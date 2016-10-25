@@ -10,26 +10,26 @@ import (
 
 type (
 	Client interface {
-		GetMostPopular(string, string, uint) ([]*MostPopularResult, error)
+		GetItemCountByTenant(uint32) (*GetItemCountByTenantResult, error)
+		AddNewItemWithTenant(uint32, uint32) (*AddNewItemWithTenantResult, error)
 	}
 	ClientImpl struct {
-		mostPopularToken string
+		itemsToken string
 	}
 )
 
-func NewClient(mostPopToken string) Client {
-	return &ClientImpl{mostPopToken}
+func NewClient(itemsToken string) Client {
+	return &ClientImpl{itemsToken}
 }
 
-func (c *ClientImpl) GetMostPopular(resourceType string, section string, timePeriodDays uint) ([]*MostPopularResult, error) {
+func (c *ClientImpl) AddNewItemWithTenant(itemId uint32, tenantId uint32) (*AddNewItemWithTenantResult, error) {
 	var (
-		res MostPopularResponse
+		res AddNewItemWithTenantResponse
 	)
-	uri := fmt.Sprintf("/svc/mostpopular/v2/%s/%s/%d.json?api-key=%s",
-		resourceType,
-		section,
-		timePeriodDays,
-		c.mostPopularToken)
+	uri := fmt.Sprintf("/svc/items/v2/%d/%d.json?api-key=%s",
+		itemId,
+		tenantId,
+		c.itemsToken)
 
 	rawRes, err := c.do(uri)
 	if err != nil {
@@ -37,7 +37,24 @@ func (c *ClientImpl) GetMostPopular(resourceType string, section string, timePer
 	}
 
 	err = json.Unmarshal(rawRes, &res)
-	return res.Results, err
+	return res.Result, err
+}
+
+func (c *ClientImpl) GetItemCountByTenant(tenantId uint32) (*GetItemCountByTenantResult, error) {
+	var (
+		res GetItemCountByTenantResponse
+	)
+	uri := fmt.Sprintf("/svc/items/v2/%d.json?api-key=%s",
+		tenantId,
+		c.itemsToken)
+
+	rawRes, err := c.do(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(rawRes, &res)
+	return res.Result, err
 }
 
 func (c *ClientImpl) do(uri string) (body []byte, err error) {
