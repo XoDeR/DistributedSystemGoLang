@@ -3,7 +3,8 @@ package service
 import (
 	"net/http"
 
-	"github.com/NYTimes/gizmo/examples/nyt"
+	"microservices.counter/common"
+
 	"github.com/NYTimes/gizmo/server"
 	"github.com/NYTimes/gizmo/web"
 	"golang.org/x/net/context"
@@ -12,7 +13,7 @@ import (
 func (s *RPCService) GetMostPopular(ctx context.Context, r *MostPopularRequest) (*MostPopularResponse, error) {
 	var (
 		err error
-		res []*nyt.MostPopularResult
+		res []*common.MostPopularResult
 	)
 	defer server.MonitorRPCRequest()(ctx, "GetMostPopular", err)
 

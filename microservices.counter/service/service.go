@@ -9,29 +9,26 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/NYTimes/gizmo/examples/nyt"
+	"microservices.counter/common"
 )
 
 type (
 	// RPCService will implement server.RPCService and
 	// handle all requests to the server.
 	RPCService struct {
-		client nyt.Client
+		client common.Client
 	}
 	// Config is a struct to contain all the needed
 	// configuration for our RPCService
 	Config struct {
 		Server           *server.Config
 		MostPopularToken string
-		SemanticToken    string
 	}
 )
 
-// NewRPCService will instantiate a RPCService
-// with the given configuration.
 func NewRPCService(cfg *Config) *RPCService {
 	return &RPCService{
-		nyt.NewClient(cfg.MostPopularToken, cfg.SemanticToken),
+		common.NewClient(cfg.MostPopularToken),
 	}
 }
 
@@ -91,8 +88,8 @@ func (s *RPCService) JSONEndpoints() map[string]map[string]server.JSONContextEnd
 		"/most-popular/{resourceType}/{section}/{timeframe}": map[string]server.JSONContextEndpoint{
 			"GET": s.GetMostPopularJSON,
 		},
-		"/cats": map[string]server.JSONContextEndpoint{
-			"GET": s.GetCatsJSON,
+		"/items/{tenantId}/count": map[string]server.JSONContextEndpoint{
+			"GET": s.GetMostPopularJSON,
 		},
 	}
 }

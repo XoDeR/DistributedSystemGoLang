@@ -1,4 +1,4 @@
-package main
+package hub
 
 import (
 	"microservices.counter/service"
@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// showing 1 way of managing gizmo/config: importing from a local file
+	// importing from a local file
 	var cfg *service.Config
 	config.LoadJSONFile("./config.json", &cfg)
 	server.SetConfigOverrides(cfg.Server)

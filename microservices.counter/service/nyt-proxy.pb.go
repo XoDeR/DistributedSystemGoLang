@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/NYTimes/gizmo/examples/nyt"
 	proto "github.com/golang/protobuf/proto"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
+	"microservices.counter/common"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -49,7 +49,7 @@ func (*MostPopularRequest) ProtoMessage()               {}
 func (*MostPopularRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 type MostPopularResponse struct {
-	Result []*nyt.MostPopularResult `protobuf:"bytes,1,rep,name=result" json:"result,omitempty"`
+	Result []*common.MostPopularResult `protobuf:"bytes,1,rep,name=result" json:"result,omitempty"`
 }
 
 func (m *MostPopularResponse) Reset()                    { *m = MostPopularResponse{} }
@@ -57,33 +57,9 @@ func (m *MostPopularResponse) String() string            { return proto.CompactT
 func (*MostPopularResponse) ProtoMessage()               {}
 func (*MostPopularResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (m *MostPopularResponse) GetResult() []*nyt.MostPopularResult {
+func (m *MostPopularResponse) GetResult() []*common.MostPopularResult {
 	if m != nil {
 		return m.Result
-	}
-	return nil
-}
-
-type CatsRequest struct {
-}
-
-func (m *CatsRequest) Reset()                    { *m = CatsRequest{} }
-func (m *CatsRequest) String() string            { return proto.CompactTextString(m) }
-func (*CatsRequest) ProtoMessage()               {}
-func (*CatsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
-
-type CatsResponse struct {
-	Results []*nyt.SemanticConceptArticle `protobuf:"bytes,1,rep,name=results" json:"results,omitempty"`
-}
-
-func (m *CatsResponse) Reset()                    { *m = CatsResponse{} }
-func (m *CatsResponse) String() string            { return proto.CompactTextString(m) }
-func (*CatsResponse) ProtoMessage()               {}
-func (*CatsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
-
-func (m *CatsResponse) GetResults() []*nyt.SemanticConceptArticle {
-	if m != nil {
-		return m.Results
 	}
 	return nil
 }
@@ -91,8 +67,6 @@ func (m *CatsResponse) GetResults() []*nyt.SemanticConceptArticle {
 func init() {
 	proto.RegisterType((*MostPopularRequest)(nil), "service.MostPopularRequest")
 	proto.RegisterType((*MostPopularResponse)(nil), "service.MostPopularResponse")
-	proto.RegisterType((*CatsRequest)(nil), "service.CatsRequest")
-	proto.RegisterType((*CatsResponse)(nil), "service.CatsResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -107,7 +81,6 @@ const _ = grpc.SupportPackageIsVersion3
 
 type NYTProxyServiceClient interface {
 	GetMostPopular(ctx context.Context, in *MostPopularRequest, opts ...grpc.CallOption) (*MostPopularResponse, error)
-	GetCats(ctx context.Context, in *CatsRequest, opts ...grpc.CallOption) (*CatsResponse, error)
 }
 
 type nYTProxyServiceClient struct {
@@ -127,20 +100,10 @@ func (c *nYTProxyServiceClient) GetMostPopular(ctx context.Context, in *MostPopu
 	return out, nil
 }
 
-func (c *nYTProxyServiceClient) GetCats(ctx context.Context, in *CatsRequest, opts ...grpc.CallOption) (*CatsResponse, error) {
-	out := new(CatsResponse)
-	err := grpc.Invoke(ctx, "/service.NYTProxyService/GetCats", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for NYTProxyService service
 
 type NYTProxyServiceServer interface {
 	GetMostPopular(context.Context, *MostPopularRequest) (*MostPopularResponse, error)
-	GetCats(context.Context, *CatsRequest) (*CatsResponse, error)
 }
 
 func RegisterNYTProxyServiceServer(s *grpc.Server, srv NYTProxyServiceServer) {
@@ -165,24 +128,6 @@ func _NYTProxyService_GetMostPopular_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NYTProxyService_GetCats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CatsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NYTProxyServiceServer).GetCats(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/service.NYTProxyService/GetCats",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NYTProxyServiceServer).GetCats(ctx, req.(*CatsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var NYTProxyService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "service.NYTProxyService",
 	HandlerType: (*NYTProxyServiceServer)(nil),
@@ -190,10 +135,6 @@ var NYTProxyService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMostPopular",
 			Handler:    _NYTProxyService_GetMostPopular_Handler,
-		},
-		{
-			MethodName: "GetCats",
-			Handler:    _NYTProxyService_GetCats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

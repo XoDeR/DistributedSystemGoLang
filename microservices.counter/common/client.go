@@ -2,7 +2,6 @@ package common
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,16 +11,14 @@ import (
 type (
 	Client interface {
 		GetMostPopular(string, string, uint) ([]*MostPopularResult, error)
-		SemanticConceptSearch(string, string) ([]*SemanticConceptArticle, error)
 	}
 	ClientImpl struct {
 		mostPopularToken string
-		semanticToken    string
 	}
 )
 
-func NewClient(mostPopToken, semanticToken string) Client {
-	return &ClientImpl{mostPopToken, semanticToken}
+func NewClient(mostPopToken string) Client {
+	return &ClientImpl{mostPopToken}
 }
 
 func (c *ClientImpl) GetMostPopular(resourceType string, section string, timePeriodDays uint) ([]*MostPopularResult, error) {
@@ -41,28 +38,6 @@ func (c *ClientImpl) GetMostPopular(resourceType string, section string, timePer
 
 	err = json.Unmarshal(rawRes, &res)
 	return res.Results, err
-}
-
-func (c *ClientImpl) SemanticConceptSearch(conceptType, concept string) ([]*SemanticConceptArticle, error) {
-	var (
-		res SemanticConceptResponse
-	)
-	uri := fmt.Sprintf("/svc/semantic/v2/concept/name/nytd_%s/%s.json?fields=article_list&api-key=%s",
-		conceptType,
-		concept,
-		c.semanticToken)
-
-	rawRes, err := c.do(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(rawRes, &res)
-	if len(res.Results) == 0 {
-		return nil, errors.New("no results")
-	}
-
-	return res.Results[0].ArticleList.Results, nil
 }
 
 func (c *ClientImpl) do(uri string) (body []byte, err error) {
